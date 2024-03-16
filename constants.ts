@@ -1,0 +1,1 @@
+export const DEFAULT_MAX_ANALYSIS_WORKERS = 4;
