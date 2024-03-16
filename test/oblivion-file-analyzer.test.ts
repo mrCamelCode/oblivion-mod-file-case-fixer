@@ -1,4 +1,4 @@
-import { assertEquals, describe, it } from '../deps.ts';
+import { assertEquals, describe, it } from '../deps.dev.ts';
 import { Path } from '../model.ts';
 import { OblivionFileAnalyzer } from '../oblivion-file-analyzer.ts';
 

@@ -1,5 +1,5 @@
 import { DEFAULT_MAX_ANALYSIS_WORKERS } from '../constants.ts';
-import { Stub, afterEach, assertEquals, assertSpyCalls, beforeEach, describe, it, stub } from '../deps.ts';
+import { Stub, afterEach, assertEquals, assertSpyCalls, beforeEach, describe, it, stub } from '../deps.dev.ts';
 import { _internals, getArgs } from '../util.ts';
 
 describe('getArgs', () => {
