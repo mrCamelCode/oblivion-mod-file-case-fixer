@@ -25,6 +25,10 @@ function analyzePaths({ modPaths, allOblivionPaths, modDataFolderPath }: PathAna
             normalizedRelativePath: matchingPath.realRelativePath.toLowerCase(),
           },
         });
+      } else {
+        indepdenentPaths.push({
+          existingPath: modPath,
+        });
       }
     } else {
       const bestPartialMatchingPathMetadata = allOblivionPaths
@@ -39,10 +43,10 @@ function analyzePaths({ modPaths, allOblivionPaths, modDataFolderPath }: PathAna
 
           let matchLevel = 0;
           for (let i = 0; i < modPathNormalizedParts.length; i++) {
-            const part = modPathNormalizedParts[i];
+            const modPart = modPathNormalizedParts[i];
             const oblivionPart = oblivionPathNormalizedParts[i];
 
-            if (part === oblivionPart) {
+            if (modPart === oblivionPart) {
               matchLevel += 1;
 
               matchingOblivionPathParts.push(oblivionPathParts[i]);
@@ -51,17 +55,25 @@ function analyzePaths({ modPaths, allOblivionPaths, modDataFolderPath }: PathAna
             }
           }
 
+          const correctedRealRelativePath = `/${matchingOblivionPathParts.join('/')}/${modPathParts
+            .slice(matchingOblivionPathParts.length)
+            .join('/')}`;
+
           return {
             matchLevel,
-            oblivionPath,
-            correctedRealRelativePath: `/${matchingOblivionPathParts.join('/')}/${modPathParts
-              .slice(matchingOblivionPathParts.length)
-              .join('/')}`,
+            correctedRealRelativePath,
+            isExactMatchExceptFilename:
+              oblivionPath.realRelativePath.substring(0, oblivionPath.realRelativePath.lastIndexOf('/')) ===
+              modPath.realRelativePath.substring(0, modPath.realRelativePath.lastIndexOf('/')),
           };
         })
         .filter((matchData) => matchData.matchLevel > 0)
-        .sort(function sortDescendingMatchLevel(a, b) {
-          if (a.matchLevel > b.matchLevel) {
+        .sort(function sortDescendingMatchLevelFavorExacts(a, b) {
+          if (a.isExactMatchExceptFilename && !b.isExactMatchExceptFilename) {
+            return -1;
+          } else if (!a.isExactMatchExceptFilename && b.isExactMatchExceptFilename) {
+            return 1;
+          } else if (a.matchLevel > b.matchLevel) {
             return -1;
           } else if (a.matchLevel < b.matchLevel) {
             return 1;
@@ -70,7 +82,11 @@ function analyzePaths({ modPaths, allOblivionPaths, modDataFolderPath }: PathAna
           return 0;
         })[0];
 
-      if (bestPartialMatchingPathMetadata) {
+      if (
+        bestPartialMatchingPathMetadata &&
+        !bestPartialMatchingPathMetadata.isExactMatchExceptFilename &&
+        modPath.realRelativePath !== bestPartialMatchingPathMetadata.correctedRealRelativePath
+      ) {
         const correctedRealPath = `${modDataFolderPath}${bestPartialMatchingPathMetadata.correctedRealRelativePath}`;
 
         problemPaths.push({

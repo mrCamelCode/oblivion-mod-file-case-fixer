@@ -82,6 +82,8 @@ export class OblivionFileAnalyzer {
 
     await waitFor(() => workers.every((worker) => worker.isComplete));
 
+    workers.forEach((worker) => worker.worker.terminate());
+
     return {
       problemPaths,
       indepdenentPaths,
